@@ -73,6 +73,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="System.Memory" Version="4.4.0-preview2-25405-01" />
+    </ItemGroup>
+
+    <ItemGroup>
         <None Update="Formatters\PrimitiveFormatter.tt">
             <Generator>TextTemplatingFileGenerator</Generator>
             <LastGenOutput>PrimitiveFormatter.cs</LastGenOutput>

@@ -71,6 +71,23 @@ namespace MessagePack
             return MessagePackBinary.FastCloneWithResize(buffer, len);
         }
 
+        public static void Serialize<T>(T obj, out Span<byte> output)
+        {
+            Serialize(obj, defaultResolver, out output);
+        }
+
+        public static void Serialize<T>(T obj, IFormatterResolver resolver, out Span<byte> output)
+        {
+            if (resolver == null) resolver = DefaultResolver;
+            var formatter = resolver.GetFormatterWithVerify<T>();
+
+            var buffer = InternalMemoryPool.GetBuffer();
+
+            var len = formatter.Serialize(ref buffer, 0, obj, resolver);
+            
+            output = new Span<byte>(buffer, 0, len);
+        }
+
         /// <summary>
         /// Serialize to binary. Get the raw memory pool byte[]. The result can not share across thread and can not hold, so use quickly.
         /// </summary>
@@ -128,10 +145,10 @@ namespace MessagePack
         {
             if (resolver == null) resolver = DefaultResolver;
             var formatter = resolver.GetFormatterWithVerify<T>();
-
             int readSize;
             return formatter.Deserialize(bytes, 0, resolver, out readSize);
         }
+
 
         public static T Deserialize<T>(ArraySegment<byte> bytes)
         {
@@ -145,6 +162,17 @@ namespace MessagePack
 
             int readSize;
             return formatter.Deserialize(bytes.Array, bytes.Offset, resolver, out readSize);
+        }
+
+        public static T Deserialize<T>(ReadOnlySpan<byte> input)
+        {
+            return Deserialize<T>(input, defaultResolver);
+        }
+
+        public static T Deserialize<T>(ReadOnlySpan<byte> input, IFormatterResolver resolver)
+        {
+            var bytes = input.ToArray();
+            return Deserialize<T>(bytes, resolver);
         }
 
         public static T Deserialize<T>(Stream stream)

@@ -68,6 +68,20 @@ namespace MessagePack.Tests
             decompress3.IsStructuralEqual(originalData);
             decompress4.IsStructuralEqual(originalData);
         }
+
+        [Fact]
+        public void SpanGenericApi()
+        {
+            Span<byte> buffer = new Span<byte>(new byte[100]);
+            var data = new FirstSimpleData { Prop1 = 9, Prop2 = "hoge", Prop3 = 999 };
+            MessagePackSerializer.Serialize(data, out buffer);
+
+            var deserialized = MessagePackSerializer.Deserialize<FirstSimpleData>(buffer);
+            Assert.NotNull(deserialized);
+            Assert.Equal(data.Prop1, deserialized.Prop1);
+            Assert.Equal(data.Prop2, deserialized.Prop2);
+            Assert.Equal(data.Prop3, deserialized.Prop3);
+        }
     }
 
     class NonMemoryStream : Stream
